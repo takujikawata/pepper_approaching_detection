@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3">
+    <Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0">
+        <bitmap>media/images/box/root.png</bitmap>
+        <script language="4">
+            <content>
+                <![CDATA[]]>
+</content>
+        </script>
+        <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+        <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+        <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+        <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+        <Timeline enable="0">
+            <BehaviorLayer name="behavior_layer1">
+                <BehaviorKeyframe name="keyframe1" index="1">
+                    <Diagram>
+                        <Box name="Stop Aware" id="12" localization="8" tooltip="" x="117" y="45">
+                            <bitmap>media/images/box/box-python-script.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        #put initialization code here
+        pass
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        self.session().service("ALBasicAwareness").stopAwareness()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
+</content>
+                            </script>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                            <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                            <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                        </Box>
+                        <Box name="Some approaching" id="1" localization="8" tooltip="" x="118" y="165">
+                            <bitmap>media/images/box/box-diagram.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[]]>
+</content>
+                            </script>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                            <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                            <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                            <Output name="somethingDetected" type="2" type_size="1" nature="2" inner="0" tooltip="output fired when something is approaching. Output the angle in degree toward the object approaching." id="5" />
+                            <Timeline enable="0">
+                                <BehaviorLayer name="behavior_layer1">
+                                    <BehaviorKeyframe name="keyframe1" index="1">
+                                        <Diagram>
+                                            <Box name="Timer" id="9" localization="8" tooltip="Stimulate output repeatedly with the specified interval.&#x0A;Can be stopped anytime. &#x0A;Stimulating the input again restarts the timer.&#x0A;" x="146" y="170">
+                                                <bitmap>media/images/box/wait.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.timer = None
+
+    def onUnload(self):
+        self.cancelTimer()
+
+    def cancelTimer(self):
+        if self.timer:
+            self.timer.stop()
+        self.timer = None
+
+    def onTimer(self):
+        self.timerOutput()
+
+    def startTimer(self):
+        import qi
+        self.timer = qi.PeriodicTask()
+        self.timer.setCallback(self.onTimer)
+        self.timer.setUsPeriod(int(self.getParameter("Period (s)") * 1000 * 1000))
+        self.timer.start(True)
+
+    def onInput_onStart(self):
+        self.cancelTimer()
+        self.startTimer()
+
+    def onInput_onStop(self):
+        if self.timer and self.timer.isRunning():
+            self.onStopped()
+        self.onUnload()]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the timer using the configured period value." id="2" />
+                                                <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the timer." id="3" />
+                                                <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when the box is stopped." id="4" />
+                                                <Output name="timerOutput" type="1" type_size="1" nature="2" inner="0" tooltip="Send a bang periodically." id="5" />
+                                                <Parameter name="Period (s)" inherits_from_parent="0" content_type="2" value="0.5" default_value="1" min="0" max="5000" tooltip="Defines the period of the timer box (in seconds).&#x0A;&#x0A;For example, if this parameter is equal to 1s, the timerOutput will be stimulated&#x0A;every second until the onStop input is stimulated." id="6" />
+                                            </Box>
+                                            <Box name="Laser sensor" id="10" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="336" y="38">
+                                                <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[import math
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        self.distances = [[0] * 16, [0] * 16, [0] * 16]
+        self.memory = ALProxy("ALMemory")
+        self.motion = ALProxy("ALMotion")
+        self.ready = False
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def doUpdate(self):
+        baseName = "Device/SubDeviceList/Platform/LaserSensor/"
+        devNames = ["Front/","Left/","Right/"]
+        distances = [[0] * 16, [0] * 16, [0] * 16]
+
+        for j in range(0,3):
+            devName = devNames[j]
+            for i in range(0,15):
+                idx = 15 - i
+                x = self.memory.getData(baseName+devName+"Horizontal/Seg%02d/X/Sensor/Value"%idx)
+                y = self.memory.getData(baseName+devName+"Horizontal/Seg%02d/Y/Sensor/Value"%idx)
+
+                distances[j][i] = math.sqrt(x * x + y * y)
+
+        return distances
+
+    def doCompare(self, newDistances):
+        baseAngles = [-30, 60, -120]
+        angleAtMax = 0
+        angleStep = 60 / 16
+
+        maxApproach = 0
+
+        for j in range(0,3):
+            angle = baseAngles[j]
+            for i in range(0,15):
+                if newDistances[j][i] < self.getParameter("ignoreDistance"):
+                    d = self.distances[j][i] - newDistances[j][i]
+                    if d > maxApproach:
+                        maxApproach = d
+                        angleAtMax = angle
+
+                angle = angle + angleStep
+
+        if maxApproach > 1:
+            self.logger.info(d)
+            self.logger.info("distance:%.2f  angle:%.2f" % (maxApproach, angleAtMax))
+            return maxApproach, angleAtMax
+        else:
+            return 0,0
+
+
+    def onInput_doUpdate(self):
+        if not self.ready:
+            return
+
+        distances = self.doUpdate()
+        dst, angle = self.doCompare(distances)
+
+        if dst != 0:
+            self.count = self.count + 1
+            if self.getParameter("move head"):
+                self.logger.info("==> moving angle:%.2f" % (angle))
+                self.motion.setAngles(["HeadYaw", "HeadPitch"], [angle/180.0*3.14, -20.0/180.0*3.14], 0.2)
+        else:
+            self.count = 0
+
+        if self.count > 4:
+            self.somethingDetected(angle)
+
+    def onInput_onStart(self):
+        import time
+
+        cnt = 0
+        for i in range(0,10):
+            distances = self.doUpdate()
+            dst, angle = self.doCompare(distances)
+            self.distances = distances
+            if dst == 0:
+                cnt = cnt + 1
+            else:
+                cnt = 0
+
+            if cnt == 3:
+                break
+
+            time.sleep(0.2)
+
+        if cnt != 3:
+            self.logger.info("Couldn't stabilize lasor sensor value..")
+
+        self.count = 0
+        self.ready = True
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                <Input name="doUpdate" type="1" type_size="1" nature="1" inner="0" tooltip="" id="3" />
+                                                <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="4" />
+                                                <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="5" />
+                                                <Output name="somethingDetected" type="2" type_size="1" nature="2" inner="0" tooltip="" id="6" />
+                                                <Parameter name="ignoreDistance" inherits_from_parent="0" content_type="2" value="1.5" default_value="2" min="0" max="7" tooltip="" id="7" />
+                                                <Parameter name="move head" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="" id="8" />
+                                            </Box>
+                                            <Link inputowner="10" indexofinput="3" outputowner="9" indexofoutput="5" />
+                                            <Link inputowner="10" indexofinput="2" outputowner="0" indexofoutput="2" />
+                                            <Link inputowner="9" indexofinput="2" outputowner="0" indexofoutput="2" />
+                                            <Link inputowner="0" indexofinput="5" outputowner="10" indexofoutput="6" />
+                                        </Diagram>
+                                    </BehaviorKeyframe>
+                                </BehaviorLayer>
+                            </Timeline>
+                        </Box>
+                        <Box name="Comment" id="2" localization="8" tooltip="To comment your behavior. Enter the text here and move the box where you like&#x0A;to add the comment.&#x0A;&#x0A;Note: This box is not functional and has no effect on the behavior." plugin="textedit_plugin" x="153" y="290">
+                            <bitmap>media/images/box/box-script.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		GeneratedClass.__init__(self)
+
+	def onInput_onStart(self):
+		self.onStopped("some approaching ボックスはレーザーセンサーで周辺を確認\n\n- ボックスを呼び出した時にまず周辺の距離を取得\n- 0.5 秒ごとに周辺を再度チェック、近づいてきた領域があった時、その方向の角度を出力\n")]]>
+</content>
+                            </script>
+                            <pluginContent>
+                                <text>
+                                    <![CDATA[some approaching ボックスはレーザーセンサーで周辺を確認
+
+- ボックスを呼び出した時にまず周辺の距離を取得
+- 0.5 秒ごとに周辺を再度チェック、近づいてきた領域があった時、その方向の角度を出力
+]]>
+</text>
+                            </pluginContent>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" />
+                        </Box>
+                        <Box name="Comment (1)" id="3" localization="8" tooltip="To comment your behavior. Enter the text here and move the box where you like&#x0A;to add the comment.&#x0A;&#x0A;Note: This box is not functional and has no effect on the behavior." plugin="textedit_plugin" x="390" y="292">
+                            <bitmap>media/images/box/box-script.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		GeneratedClass.__init__(self)
+
+	def onInput_onStart(self):
+		self.onStopped("パラメータ\n- Some approaching ボックスの Laser sensor ボックス\n   - igrnoreDistance : これ以上離れているオブジェクトは無視する\n   - move head : 近づいてきた方を向く\n")]]>
+</content>
+                            </script>
+                            <pluginContent>
+                                <text>
+                                    <![CDATA[パラメータ
+- Some approaching ボックスの Laser sensor ボックス
+   - igrnoreDistance : これ以上離れているオブジェクトは無視する
+   - move head : 近づいてきた方を向く
+]]>
+</text>
+                            </pluginContent>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" />
+                        </Box>
+                        <Link inputowner="12" indexofinput="2" outputowner="0" indexofoutput="2" />
+                        <Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" />
+                    </Diagram>
+                </BehaviorKeyframe>
+            </BehaviorLayer>
+        </Timeline>
+    </Box>
+</ChoregrapheProject>

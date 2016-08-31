@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package uuid="aproaching_detection-facd1b" version="0.0.0">
+<package uuid="approaching_detection-a75670" version="0.0.0">
  <names>
-  <name lang="en_US">aproaching_detection</name>
+  <name lang="en_US">approaching_detection</name>
  </names>
  <supportedLanguages>
   <language>en_US</language>
